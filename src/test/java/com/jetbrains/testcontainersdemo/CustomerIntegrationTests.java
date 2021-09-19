@@ -21,10 +21,14 @@ public class CustomerIntegrationTests {
     private CustomerDao customerDao;
 
     @Container
-    private static MySQLContainer container = new MySQLContainer("mysql:latest")
-            .withDatabaseName("somedatabase")
-            .withUsername("root")
-            .withPassword("letsgomarco");
+    private static MySQLContainer container = new MySQLContainer("mysql:latest");
+
+    @DynamicPropertySource
+    public static void overrideDatabaseProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", container::getJdbcUrl);
+        registry.add("spring.datasource.username", container::getUsername);
+        registry.add("spring.datasource.password", container::getPassword);
+    }
 
     @Test
     void when_using_a_clean_db_this_should_be_empty() {
