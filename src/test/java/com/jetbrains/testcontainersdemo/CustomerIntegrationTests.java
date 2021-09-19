@@ -1,5 +1,6 @@
 package com.jetbrains.testcontainersdemo;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,14 +18,25 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Testcontainers
 public class CustomerIntegrationTests {
 
     @Autowired
     private CustomerDao customerDao;
 
-    @Container
-    private static MySQLContainer container = new MySQLContainer("mysql:latest");
+    private static MySQLContainer container = (MySQLContainer) new MySQLContainer("mysql:latest")
+            .withReuse(true);
+
+    /*
+    cat ~/.testcontainers.properties
+    docker.client.strategy=org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy
+    docker.client.strategy=org.testcontainers.dockerclient.UnixSocketClientProviderStrategy
+    testcontainers.reuse.enable=true
+    */
+
+    @BeforeAll
+    public static void setup() {
+        container.start();
+    }
 
     @DynamicPropertySource
     public static void overrideDatabaseProperties(DynamicPropertyRegistry registry) {
