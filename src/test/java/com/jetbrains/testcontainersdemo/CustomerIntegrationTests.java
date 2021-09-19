@@ -1,16 +1,10 @@
 package com.jetbrains.testcontainersdemo;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.BindMode;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.containers.output.OutputFrame;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,32 +12,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-public class CustomerIntegrationTests {
+public class CustomerIntegrationTests extends AbstractMysqlTest {
 
     @Autowired
     private CustomerDao customerDao;
-
-    private static MySQLContainer container = (MySQLContainer) new MySQLContainer("mysql:latest")
-            .withReuse(true);
-
-    /*
-    cat ~/.testcontainers.properties
-    docker.client.strategy=org.testcontainers.dockerclient.EnvironmentAndSystemPropertyClientProviderStrategy
-    docker.client.strategy=org.testcontainers.dockerclient.UnixSocketClientProviderStrategy
-    testcontainers.reuse.enable=true
-    */
-
-    @BeforeAll
-    public static void setup() {
-        container.start();
-    }
-
-    @DynamicPropertySource
-    public static void overrideDatabaseProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", container::getJdbcUrl);
-        registry.add("spring.datasource.username", container::getUsername);
-        registry.add("spring.datasource.password", container::getPassword);
-    }
 
     @Test
     void when_using_a_clean_db_this_should_be_empty() {
